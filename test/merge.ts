@@ -1,2 +1,2 @@
-import { merge } from '../src/util/merge';
+import { merge } from '../src/merge';
 
