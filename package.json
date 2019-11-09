@@ -1,0 +1,17 @@
+{
+  "name": "cqes-util",
+  "version": "1.0.0",
+  "description": "An utility library for CQES framwork",
+  "main": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apiculteur/cqes-util.git"
+  },
+  "keywords": [],
+  "author": "Nicolas Pelletier <npelletier@apiculteur.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/apiculteur/cqes-util/issues"
+  },
+  "homepage": "https://github.com/apiculteur/cqes-util#readme"
+}
