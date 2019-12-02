@@ -79,7 +79,7 @@ export class Tree {
     } break ;
     case '[object Arguments]': case '[object Array]': {
       for (let i = 0; i < result.length; i += 1)
-        result[i] = Tree.replace(result[key], iterator, i);
+        result[i] = Tree.replace(result[i], iterator, i);
     } break ;
     case '[object Map]': {
       for (const [key, value] of result)

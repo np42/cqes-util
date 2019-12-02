@@ -28,7 +28,7 @@ export function qsencode(data: Object) {
 const isNumber = /^-?((\d*(\.\d+)?)|Infinity)$/;
 const pathSeparator = /\]\[|[\]\[]/;
 export function qsdecode(str: string) {
-  return str.split('&').reduce((accu: any, kv: string) => {
+  const result = str.split('&').reduce((accu: any, kv: string) => {
     const offset = kv.indexOf('=');
     if (!(offset >= 0)) return accu;
     const escapedKey   = kv.substring(0, offset);
@@ -54,19 +54,19 @@ export function qsdecode(str: string) {
       }
       return accu[key];
     }, result);
-    Tree.replace(result, (value: any) => {
-      if (value && typeof value === 'object') {
-        const keys = Object.keys(value).map(n => parseInt(n)).sort((l, r) => l - r);
-        const array = [];
-        for (let i = 0; i < keys.length; i += 1) {
-          if (keys[i] !== i) return value;
-          array.push(value[i]);
-        }
-        return array;
-      } else {
-        return value;
-      }
-    });
     return merge(accu, result);
   }, {});
+  return Tree.replace(result, (value: any) => {
+    if (value && typeof value === 'object') {
+      const keys = Object.keys(value).map(n => parseInt(n)).sort((l, r) => l - r);
+      const array = [];
+      for (let i = 0; i < keys.length; i += 1) {
+        if (keys[i] !== i) return value;
+        array.push(value[i]);
+      }
+      return array;
+    } else {
+      return value;
+    }
+  });
 }
