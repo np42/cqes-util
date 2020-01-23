@@ -118,3 +118,18 @@ export function serialize(data: any, skipempty?: boolean, iterator?: Function): 
     return serialize(Object.prototype.toString.call(data), skipempty, iterator);
   }
 }
+
+/*
+export function diff(from: any, to: any, iter: (path: string, from: any, to: any) => void) {
+  if (from === to) return ;
+  const fromType = Object.prototype.toString.call(from);
+  const toType   = Object.prototype.toString.call(to);
+  switch (fromType) {
+  case '[object Undefined]': case '[object Null]':
+    switch (toType) {
+    case '[object Undefined]': case '[object Null]': return ;
+    default : return 
+    }
+  }
+}
+*/

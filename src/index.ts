@@ -10,4 +10,5 @@ export { Fx }             from './Fx';
 export { ExpireMap }      from './ExpireMap';
 export { VM, AST }        from './VM';
 export *                  from './objects';
-import { Digest }         from './Digest';
+export { Digest }         from './Digest';
+export { TaskQueue }      from './TaskQueue';
