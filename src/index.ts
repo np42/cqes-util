@@ -11,4 +11,5 @@ export { ExpireMap }      from './ExpireMap';
 export { VM, AST }        from './VM';
 export *                  from './objects';
 export { Digest }         from './Digest';
-export { TaskQueue }      from './TaskQueue';
+import * as TaskQueue     from './TaskQueue';
+export { TaskQueue };

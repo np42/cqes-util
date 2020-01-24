@@ -6,9 +6,9 @@ export interface props<T> {
   onError?:        (payload: T) => void;
 }
 
-export type handler<T> = (payload: T) => Promise<void>;
+export type handler<T> = (payload: T, task: Task<T>) => Promise<void>;
 
-interface Task<T> {
+export interface Task<T> {
   retryCount: number;
   nextRetry:  number;
   payload:    T;
@@ -35,6 +35,8 @@ export class TaskQueue<T> {
     this.maxRetry       = props.maxRetry       || 5;
     this.retryPolicy    = props.retryPolicy    || [1, 60, 300, 3600, 3000, 43200];
     this.maxRunningJobs = props.maxRunningJobs || 1;
+    if (typeof this.handler !== 'function')
+      throw new Error('Need an handler');
   }
 
   public push(...args: Array<T>) {
@@ -69,24 +71,27 @@ export class TaskQueue<T> {
   }
 
   protected drain() {
-    if (!this.enabled) return ;
-    if (!(this.running < this.maxRunningJobs)) return ;
-    if (!(this.queue.length > 0)) return ;
-    const task = this.getNextTask();
-    if (task == null) {
-      const now = Date.now();
-      this.timer = setTimeout(() => this.drain(), this.queue[0].nextRetry - now + 1);
-    } else {
-      if (this.timer) clearTimeout(this.timer);
-      this.timer = null;
-      this.handler(task.payload).then(() => {
-        this.drain();
-      }).catch((e: Error) => {
-        if (task.retryCount >= this.maxRetry) return this.onError(task.payload);
-        const retryCount = task.retryCount + 1;
-        const retryDelay = this.retryPolicy[Math.min(this.retryPolicy.length - 1, retryCount)] * 1000;
-        this.insert(retryCount, Date.now() + retryDelay, task.payload);
-      });
+    while (this.enabled && this.running < this.maxRunningJobs && this.queue.length > 0) {
+      const task = this.getNextTask();
+      if (task == null) {
+        const now = Date.now();
+        this.timer = setTimeout(() => this.drain(), this.queue[0].nextRetry - now + 1);
+      } else {
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = null;
+        let promise = null;
+        try { promise = this.handler(task.payload, task) }
+        catch (e) { promise = Promise.reject(e); }
+        promise.then(() => {
+          this.drain();
+        }).catch((e: Error) => {
+          if (task.retryCount >= this.maxRetry) return this.onError(task.payload);
+          const retryCount = task.retryCount + 1;
+          const retryDelay = this.retryPolicy[Math.min(this.retryPolicy.length - 1, retryCount)] * 1000;
+          this.insert(retryCount, Date.now() + retryDelay, task.payload);
+          this.drain();
+        });
+      }
     }
   }
 
