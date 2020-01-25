@@ -71,11 +71,14 @@ export class TaskQueue<T> {
   }
 
   protected drain() {
-    while (this.enabled && this.running < this.maxRunningJobs && this.queue.length > 0) {
+    while (this.enabled) {
+      if (this.running >= this.maxRunningJobs) return ;
+      if (this.queue.length === 0) return ;
       const task = this.getNextTask();
       if (task == null) {
-        const now = Date.now();
-        this.timer = setTimeout(() => this.drain(), this.queue[0].nextRetry - now + 1);
+        if (this.timer != null) return ;
+        const delay = this.queue[0].nextRetry - Date.now() + 1;
+        this.timer = setTimeout(() => { this.timer = null; this.drain() }, delay);
       } else {
         if (this.timer) clearTimeout(this.timer);
         this.timer = null;
