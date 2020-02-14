@@ -2,7 +2,7 @@ import { Tree }  from './Tree';
 import { merge } from './merge';
 
 export function qsencode(data: Object) {
-  if (!data || data.constructor !== Object) throw new Error('Must have an Object');
+  if (!data || !(data instanceof Object)) throw new Error('Must have an Object');
   const result = [];
   (function loop(key: any, data: any, accu: any) {
     const escapedKey = encodeURIComponent(key);
