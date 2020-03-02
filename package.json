@@ -12,5 +12,8 @@
   "bugs": {
     "url": "https://github.com/apiculteur/cqes-util/issues"
   },
-  "homepage": "https://github.com/apiculteur/cqes-util#readme"
+  "homepage": "https://github.com/apiculteur/cqes-util#readme",
+  "dependencies": {
+    "js-yaml": "^3.13.1"
+  }
 }
