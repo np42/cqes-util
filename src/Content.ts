@@ -1,6 +1,8 @@
 import * as fs            from 'fs';
-import { join, basename } from 'path';
-import { Tree }           from 'Tree';
+import { join, dirname }  from 'path';
+import { Tree }           from './Tree';
+import { merge }          from './merge';
+import * as Obj           from './objects';
 const yaml                = require('js-yaml');
 
 export function getFile(file: string) {
@@ -13,29 +15,25 @@ export async function get(data: any) {
   return data;
 }
 
-export async function resolveInclude(data: any, basedir: string) {
+export async function resolveInclude(data: any, basedir?: string): Promise<any> {
+  if (basedir == null) basedir = '.';
   switch (Object.prototype.toString.call(data)) {
   case '[object Object]':  {
-    const result = {};
+    let result = {};
     const keys = Object.keys(data);
     for (const key of keys) {
       if (key.substr(0, 2) === '%:') {
         const [scheme, file, extract, target] = key.split(':');
-        const filepath = join(basedir || '.', file);
+        const filepath = file[0] == '/' ? file : join(basedir, file);
         let content = null;
         switch (file.substr(file.lastIndexOf('.'))) {
         case '.json': { content = await readJSON(filepath); } break ;
         case '.yaml': case '.yml': { content = await readYAML(filepath); } break ;
+        default : { content = { text: (await readText(filepath)).toString() }; } break ;
         }
-        const keys = [];
-        if (extract == '*') {
-          Array.prototype.push.apply(keys, Object.keys(content));
-        } else {
-          throw new Error('Not implemented');
-        }
-        if (target == null) {
-          for (const key of keys)
-            data[key] = await resolveInclude(content[key], basename(filepath));
+        const resolved = await resolveInclude(content, dirname(filepath));
+        if (extract == '*' && target == null) {
+          result = merge(resolved, data[key]);
         } else {
           throw new Error('Not implemented');
         }
@@ -68,9 +66,9 @@ export function resolveReference(data: any, root?: any) {
         const target     = key.substr(lastOffset + 1);
         const skip       = lastOffset === 1 ? 1 : Number(target);
         const source     = key.substring(2, lastOffset > 1 ? lastOffset : key.length);
-        const value      = merge(get(root, source), Process.inflateContent(holder[key], root));
+        const value      = merge(Obj.get(root, source), resolveReference(holder[key], root));
         const output     = isNaN(skip) ? target : source.split('.').slice(skip).join('.');
-        set(result, output, value);
+        Obj.set(result, output, value);
       } else {
         result[key] = holder[key];
       }
@@ -79,20 +77,21 @@ export function resolveReference(data: any, root?: any) {
   });
 }
 
-export async readJSON(filepath: string) {
-  return require(filepath);
+export async function readText(filepath: string) {
+  return new Promise((resolve, reject) => {
+    return fs.readFile(filepath, (err, content) => {
+      if (err) return reject(err);
+      else return resolve(content);
+    });
+  });
+}
+
+export async function readJSON(filepath: string) {
+  const buffer = await readText(filepath);
+  return JSON.parse(buffer.toString());
 }
 
 export async function readYAML(filepath: string) {
-  return await new Promise((resolve, reject) => {
-    return fs.readFile(filepath, (err, content) => {
-      if (err) return reject(err);
-      try {
-        const config = yaml.safeLoad(content.toString());
-        return resolve(config);
-      } catch (e) {
-        return reject(e);
-      }
-    });
-  });
+  const buffer = await readText(filepath);
+  return yaml.safeLoad(buffer.toString());
 }
