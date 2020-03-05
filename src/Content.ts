@@ -66,7 +66,9 @@ export function resolveReference(data: any, root?: any) {
         const target     = key.substr(lastOffset + 1);
         const skip       = lastOffset === 1 ? 1 : Number(target);
         const source     = key.substring(2, lastOffset > 1 ? lastOffset : key.length);
-        const value      = merge(Obj.get(root, source), resolveReference(holder[key], root));
+        const reference  = resolveReference(Obj.get(root, source), root);
+        const appliment  = resolveReference(holder[key], root);
+        const value      = merge(reference, appliment);
         const output     = isNaN(skip) ? target : source.split('.').slice(skip).join('.');
         Obj.set(result, output, value);
       } else {

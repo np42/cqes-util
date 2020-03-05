@@ -23,12 +23,16 @@ function mergeTwo<S, T>(left: S, right: T): any {
 
 function mergeObject<S, T>(left: S, right: T): T {
   // TODO: write better algo
-  const result = clone(right);
+  const result = <T>{};
   for (const key in <any>left) {
-    if (result[key] === undefined)
+    if (right[key] === undefined)
       result[key] = clone(left[key]);
     else
       result[key] = merge(left[key], right[key]);
+  }
+  for (const key in <any>right) {
+    if (key in result) continue ;
+    result[key] = clone(right[key]);
   }
   return result;
 }

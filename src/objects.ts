@@ -4,6 +4,7 @@ export function get(data: any, path: string) {
 }
 
 export function set(target: any, path: string, value: any) {
+  if (path === '.') return Object.assign(target, value);
   for (const chain = path.split('.'); chain.length > 0; target = target[chain.shift()]) {
     const key = chain[0];
     if (chain.length == 1) {
