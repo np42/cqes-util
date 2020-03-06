@@ -63,7 +63,7 @@ export class TaskQueue<T> {
   protected insert(retryCount: number, nextRetry: number, payload: T) {
     const task = { retryCount, nextRetry, payload };
     for (let i = 0; i < this.queue.length; i += 1) {
-      if (this.queue[i].nextRetry < nextRetry) continue ;
+      if (this.queue[i].nextRetry <= nextRetry) continue ;
       this.queue.splice(i, 0, task);
       return ;
     }
@@ -80,14 +80,17 @@ export class TaskQueue<T> {
         const delay = this.queue[0].nextRetry - Date.now() + 1;
         this.timer = setTimeout(() => { this.timer = null; this.drain() }, delay);
       } else {
+        this.running += 1;
         if (this.timer) clearTimeout(this.timer);
         this.timer = null;
         let promise = null;
         try { promise = this.handler(task.payload, task) }
         catch (e) { promise = Promise.reject(e); }
         promise.then(() => {
+          this.running -= 1;
           this.drain();
         }).catch((e: Error) => {
+          this.running -= 1;
           if (task.retryCount >= this.maxRetry) return this.onError(task.payload);
           const retryCount = task.retryCount + 1;
           const retryDelay = this.retryPolicy[Math.min(this.retryPolicy.length - 1, retryCount)] * 1000;
