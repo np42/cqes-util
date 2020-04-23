@@ -11,11 +11,13 @@ export type handler<T> = (payload: T, task: Task<T>) => Promise<void>;
 export interface Task<T> {
   retryCount: number;
   nextRetry:  number;
+  slot:       string;
   payload:    T;
 }
 
 export class TaskQueue<T> {
-  protected queue:          Array<Task<T>>;
+  protected queue:          Array<Task<T>>; // Time ordered
+  protected busySlots:      Set<string>;
   protected running:        number;
   protected enabled:        boolean;
   protected timer:          NodeJS.Timer;
@@ -27,6 +29,7 @@ export class TaskQueue<T> {
 
   constructor(props: props<T>) {
     this.queue          = [];
+    this.busySlots      = new Set();
     this.running        = 0;
     this.enabled        = true;
     this.timer          = null;
@@ -39,10 +42,8 @@ export class TaskQueue<T> {
       throw new Error('Need an handler');
   }
 
-  public push(...args: Array<T>) {
-    const now = Date.now();
-    for (let i = 0; i < args.length; i += 1)
-      this.insert(0, now, args[i]);
+  public push(task: T, slot?: string) {
+    this.insert(0, Date.now(), slot, task);
     this.drain();
     return this.queue.length;
   }
@@ -60,8 +61,8 @@ export class TaskQueue<T> {
 
   // ------------------------
 
-  protected insert(retryCount: number, nextRetry: number, payload: T) {
-    const task = { retryCount, nextRetry, payload };
+  protected insert(retryCount: number, nextRetry: number, slot: string, payload: T) {
+    const task = { retryCount, nextRetry, slot, payload };
     for (let i = 0; i < this.queue.length; i += 1) {
       if (this.queue[i].nextRetry <= nextRetry) continue ;
       this.queue.splice(i, 0, task);
@@ -77,24 +78,29 @@ export class TaskQueue<T> {
       const task = this.getNextTask();
       if (task == null) {
         if (this.timer != null) return ;
+        if (this.running > 0) return ;
         const delay = this.queue[0].nextRetry - Date.now() + 1;
         this.timer = setTimeout(() => { this.timer = null; this.drain() }, delay);
+        return ;
       } else {
         this.running += 1;
         if (this.timer) clearTimeout(this.timer);
         this.timer = null;
         let promise = null;
-        try { promise = this.handler(task.payload, task) }
+        if (task.slot != null) this.busySlots.add(task.slot);
+        try { promise = this.handler(task.payload, task); }
         catch (e) { promise = Promise.reject(e); }
         promise.then(() => {
           this.running -= 1;
+          this.busySlots.delete(task.slot);
           this.drain();
         }).catch((e: Error) => {
           this.running -= 1;
+          this.busySlots.delete(task.slot);
           if (task.retryCount >= this.maxRetry) return this.onError(task.payload);
           const retryCount = task.retryCount + 1;
           const retryDelay = this.retryPolicy[Math.min(this.retryPolicy.length - 1, retryCount)] * 1000;
-          this.insert(retryCount, Date.now() + retryDelay, task.payload);
+          this.insert(retryCount, Date.now() + retryDelay, task.slot, task.payload);
           this.drain();
         });
       }
@@ -103,9 +109,12 @@ export class TaskQueue<T> {
 
   protected getNextTask() {
     const now = Date.now();
-    for (let i = 0; i < this.queue.length; i += 1)
-      if (this.queue[i].nextRetry <= now)
-        return this.queue.splice(i, 1)[0];
+    for (let i = 0; i < this.queue.length; i += 1) {
+      const task = this.queue[i];
+      if (task.nextRetry > now) return null;
+      if (task.slot != null && this.busySlots.has(task.slot)) continue ;
+      return this.queue.splice(i, 1)[0];
+    }
     return null;
   }
 
