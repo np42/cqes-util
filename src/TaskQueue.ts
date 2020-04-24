@@ -37,7 +37,7 @@ export class TaskQueue<T> {
     this.handler        = props.handler;
     this.onError        = props.onError        || (() => {});
     this.maxRetry       = props.maxRetry       || 5;
-    this.retryPolicy    = props.retryPolicy    || [1, 60, 300, 3600, 3000, 43200];
+    this.retryPolicy    = props.retryPolicy    || [1, 20, 60, 300, 900];
     this.maxRunningJobs = props.maxRunningJobs || 1;
     if (typeof this.handler !== 'function')
       throw new Error('Need an handler');
