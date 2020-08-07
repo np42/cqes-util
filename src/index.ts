@@ -10,6 +10,7 @@ export { Fx }             from './Fx';
 export { ExpireMap }      from './ExpireMap';
 export { VM, AST }        from './VM';
 export *                  from './objects';
+export { Awaiter }        from './Awaiter';
 export { Digest }         from './Digest';
 import * as Content       from './Content';
 import * as TaskQueue     from './TaskQueue';

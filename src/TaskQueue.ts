@@ -1,6 +1,7 @@
 export interface props<T> {
   maxRunningJobs?: number;
   maxRetry?:       number;
+  cooldown?:       number; // ms to wait before starting next task
   retryPolicy?:    Array<number>;
   handler:         handler<T>;
   onError?:        (payload: T) => void;

@@ -8,7 +8,7 @@ export function qsencode(data: Object) {
     const escapedKey = encodeURIComponent(key);
     const path = key === null ? '' : accu + (accu.length === 0 ? escapedKey : '[' + escapedKey + ']');
     switch (Object.prototype.toString.call(data)) {
-    case '[object Null]': case '[object Number]': case '[object Boolean]': case '[object String]':
+    case '[object Number]': case '[object Boolean]': case '[object String]':
       result.push(path + '=' + encodeURIComponent(data));
       return accu;
     case '[object Object]':
@@ -18,7 +18,7 @@ export function qsencode(data: Object) {
       let index = 0;
       for (const value of data) loop(index++, value, path);
       return accu;
-    default:
+    case '[object Null]': case '[object Undefined]': default :
       return accu;
     }
   })(null, data, '');

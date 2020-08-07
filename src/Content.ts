@@ -62,17 +62,19 @@ export function resolveReference(data: any, root?: any) {
     const result = {};
     for (const key in holder) {
       if (key.substr(0, 2) === '&:') {
-        const lastOffset = key.lastIndexOf(':');
-        const target     = key.substr(lastOffset + 1);
-        const skip       = lastOffset === 1 ? 1 : Number(target);
-        const source     = key.substring(2, lastOffset > 1 ? lastOffset : key.length);
-        const reference  = resolveReference(Obj.get(root, source), root);
+        const parts      = key.split(':');
+        if (~parts[1].indexOf('.') && parts.length < 3) throw new Error(key + ': needs a target');
+        else if (parts[2] == null) parts[2] = parts[1];
+        const reference  = resolveReference(Obj.get(root, parts[1]), root);
         const appliment  = resolveReference(holder[key], root);
         const value      = merge(reference, appliment);
-        const output     = isNaN(skip) ? target : source.split('.').slice(skip).join('.');
-        Obj.set(result, output, value);
-      } else {
-        result[key] = holder[key];
+        if (/^\d+$/.test(parts[2])) {
+          Obj.set(result, parts[1].split('.').slice(Number(parts[2])).join('.') || '.', value);
+        } else {
+          Obj.set(result, parts[2], value);
+        }
+      } else if (!(key in result)) {
+        result[key] = resolveReference(holder[key], root);
       }
     }
     return result;
