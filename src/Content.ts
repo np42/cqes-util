@@ -10,9 +10,7 @@ export function getFile(file: string) {
 }
 
 export async function get(data: any) {
-  data = await resolveInclude(data);
-  data = resolveReference(data);
-  return data;
+  return await resolveInclude(data);
 }
 
 export async function resolveInclude(data: any, basedir?: string): Promise<any> {
@@ -38,19 +36,19 @@ export async function resolveInclude(data: any, basedir?: string): Promise<any> 
           throw new Error('Not implemented');
         }
       } else {
-        result[key] = await resolveInclude(data[key]);
+        result[key] = await resolveInclude(data[key], basedir);
       }
     }
-    return result;
+    return resolveReference(result);
   }
   case '[object Array]': {
     const result = [];
     for (let i = 0; i < data.length; i += 1)
-      result[i] = await resolveInclude(data[i]);
-    return result;
+      result[i] = await resolveInclude(data[i], basedir);
+    return resolveReference(result);
   }
   default :
-    return data;
+    return resolveReference(data);
   }
 }
 
