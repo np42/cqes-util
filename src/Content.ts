@@ -14,6 +14,10 @@ export async function get(data: any) {
 }
 
 export async function resolveInclude(data: any, basedir?: string): Promise<any> {
+  return resolveReference(await resolveOnlyInclude(data, basedir));
+}
+
+export async function resolveOnlyInclude(data: any, basedir?: string): Promise<any> {
   if (basedir == null) basedir = '.';
   switch (Object.prototype.toString.call(data)) {
   case '[object Object]':  {
@@ -22,7 +26,7 @@ export async function resolveInclude(data: any, basedir?: string): Promise<any> 
     for (const key of keys) {
       if (key.substr(0, 2) === '%:') {
         const [scheme, file, extract, target] = key.split(':');
-        const filepath = file[0] == '/' ? file : join(basedir, file);
+        const filepath = file[0] === '/' ? file : join(basedir, file);
         let content = null;
         switch (file.substr(file.lastIndexOf('.'))) {
         case '.json': { content = await readJSON(filepath); } break ;
@@ -36,19 +40,19 @@ export async function resolveInclude(data: any, basedir?: string): Promise<any> 
           throw new Error('Not implemented');
         }
       } else {
-        result[key] = await resolveInclude(data[key], basedir);
+        result[key] = await resolveOnlyInclude(data[key], basedir);
       }
     }
-    return resolveReference(result);
+    return result;
   }
   case '[object Array]': {
     const result = [];
     for (let i = 0; i < data.length; i += 1)
-      result[i] = await resolveInclude(data[i], basedir);
-    return resolveReference(result);
+      result[i] = await resolveOnlyInclude(data[i], basedir);
+    return result;
   }
   default :
-    return resolveReference(data);
+    return data;
   }
 }
 
