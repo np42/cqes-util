@@ -42,7 +42,7 @@ export function remove(target: any, path: string | Array<string>) {
   const chain = typeof path === 'string' ? path.split('.') : path;
   while (chain.length > 1 && target != null) target = target[chain.shift()];
   const key = chain[0];
-  if (target instanceof Array && Number(key) == key) {
+  if (target instanceof Array && /^\d+$/.test(key)) {
     target.splice(Number(key), 1);
   } else if (typeof target === 'object') {
     delete target[key];

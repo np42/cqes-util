@@ -38,7 +38,8 @@ export async function get(data: any) {
   }
   Tree.walk(data, (path, setter, holder) => {
     const key = path[path.length - 1];
-    const scheme = key.substr(0, 2);
+    if (typeof key !== 'string') return ;
+    const scheme = key.slice(0, 2);
     if (scheme !== '&:') return ;
     if (typeof setter !== 'function') return ;
     delete holder[key];
@@ -52,7 +53,8 @@ export function process(node: any, path: Array<string>, basedir: string) {
   Tree.walk(Obj.get(node, path), (path, overwrite, holder) => {
     if (typeof overwrite === 'function') return ;
     const key = path[path.length - 1];
-    const scheme = key.substr(0, 2);
+    if (typeof key !== 'string') return ;
+    const scheme = key.slice(0, 2);
     switch (scheme) {
     case '%:': {
       const [scheme, file, extract, target] = key.split(':');
