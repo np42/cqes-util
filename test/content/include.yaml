@@ -1,0 +1,14 @@
+---
+
+A:
+  hello: world
+
+B:
+  '%:./deeper/extra.json:*': {}
+  '&:D:1': {}
+
+C:
+  foo: bar
+
+D:
+  value: initial

@@ -1,21 +1,16 @@
-const Test    = require('cqes-test');
-const Content = require('../dist/src/Content');
+const Test     = require('cqes-test');
+const { join } = require('path');
+const Content  = require('../dist/src/Content');
 
 Test.test(
-  { 'resolveReference':
+  { 'resolveInclude':
     { 1:
-      [ () => Content.resolveReference({ '&:A': { b: 42, c: 'youpi' }, A: { a : 21, b: true } })
-      , [ 'Assert.equiv', { A: { a: 21, b: 42, c: 'youpi' } } ]
-      ]
-    , 2:
-      [ () => Content.resolveReference({ '&:A_B': { C: { honey: 'pot', pli: 'muk' } }
-                                       , 'A_B': { '&:_.A:2': { C: { pli: 'foo', some: 'value', overwrite: 1 } } }
-                                       , _: { A: { C: { overwrite: 0, based: 'value' } } }
-                                       }
-                                      )
-      , [ 'Assert.equiv', { A_B: { C: { honey: 'pot', pli: 'muk', some: 'value', 'overwrite': 1, based: 'value' } }
-                          , _: { A: { C: { overwrite: 0, based: 'value' } } }
-                          }
+      [ () => Content.getFile(join(__dirname, './content/test.yaml'))
+      , [ 'Assert.fields'
+        , [ 'A', 'equiv', { hello: 'world', foo: 'bar', pli: 'muk' } ]
+        , [ 'B', 'equiv', { some: 'data', value: 'replaced' } ]
+        , [ 'C', 'equiv', { foo: 'bar' } ]
+        , [ 'D', 'equiv', { value: 'replaced' } ]
         ]
       ]
     }

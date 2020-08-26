@@ -1,0 +1,8 @@
+---
+'%:include.yaml:*':
+
+  A:
+    '&:C:1': { pli: muk }
+
+  D:
+    value: replaced

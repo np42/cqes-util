@@ -1,11 +1,15 @@
-export function get(data: any, path: string) {
+import { merge } from './merge';
+
+export function get(data: any, path: string | Array<string>) {
   if (!path) return data;
-  return path.split('.').reduce((value, key) => value ? value[key] : null, data);
+  const chain = typeof path === 'string' ? path.split('.') : path;
+  return chain.reduce((value, key) => value ? value[key] : null, data);
 }
 
-export function set(target: any, path: string, value: any) {
-  if (path === '.') return Object.assign(target, value);
-  for (const chain = path.split('.'); chain.length > 0; target = target[chain.shift()]) {
+export function set(target: any, path: string | Array<string>, value: any) {
+  if (path === '.' || path.length === 0) return Object.assign(target, value);
+  const chain = typeof path === 'string' ? path.split('.') : path;
+  for ( ; chain.length > 0; target = target[chain.shift()]) {
     const key = chain[0];
     if (chain.length == 1) {
       target[key] = value;
@@ -31,6 +35,17 @@ export function set(target: any, path: string, value: any) {
         }
       }
     }
+  }
+}
+
+export function remove(target: any, path: string | Array<string>) {
+  const chain = typeof path === 'string' ? path.split('.') : path;
+  while (chain.length > 1 && target != null) target = target[chain.shift()];
+  const key = chain[0];
+  if (target instanceof Array && Number(key) == key) {
+    target.splice(Number(key), 1);
+  } else if (typeof target === 'object') {
+    delete target[key];
   }
 }
 

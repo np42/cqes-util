@@ -1,6 +1,43 @@
 type reduceIterator = (accu: any, key: any, value: any, skip: () => void) => any;
+type walkIterator = (path: Array<any>, value: any, holder: any) => void;
+
 
 export class Tree {
+
+  static walk(tree: any, iterator: walkIterator, path: Array<any> = []) {
+    switch (Object.prototype.toString.call(tree)) {
+    case '[object Object]': {
+      for (const key in tree) {
+        const fieldpath = [...path, key];
+        iterator(fieldpath.slice(), tree[key], tree);
+        Tree.walk(tree[key], iterator, fieldpath);
+      }
+    } break ;
+    case '[object Arguments]': case '[object Array]': {
+      for (let i = 0; i < tree.length; i += 1) {
+        const fieldpath = [...path, i];
+        iterator(fieldpath.slice(), tree[i], tree);
+        Tree.walk(tree[i], iterator, fieldpath);
+      }
+    } break ;
+    case '[object Map]': {
+      for (const [key, value] of tree) {
+        const fieldpath = [...path, key];
+        iterator(fieldpath.slice(), tree[key], tree);
+        Tree.walk(value, iterator, fieldpath);
+      }
+    } break ;
+    case '[object Set]': {
+      let index = 0;
+      for (const value of tree) {
+        const fieldpath = [...path, index];
+        iterator(fieldpath.slice(), tree[index], tree);
+        Tree.walk(value, iterator, fieldpath);
+        index += 1;
+      }
+    } break ;
+    }
+  }
 
   static map(tree: any, iterator: (key: any, value: any) => any, key: any = null): any {
     switch (Object.prototype.toString.call(tree)) {
