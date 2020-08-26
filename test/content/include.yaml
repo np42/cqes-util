@@ -12,3 +12,8 @@ C:
 
 D:
   value: initial
+
+E:
+ '&:D:hello':
+   toto: 42
+   '&:C:0': {}

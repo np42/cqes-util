@@ -6,11 +6,13 @@ Test.test(
   { 'resolveInclude':
     { 1:
       [ () => Content.getFile(join(__dirname, './content/test.yaml'))
+      , e => { console.log(e); return e; }
       , [ 'Assert.fields'
         , [ 'A', 'equiv', { hello: 'world', foo: 'bar', pli: 'muk' } ]
         , [ 'B', 'equiv', { some: 'data', value: 'replaced' } ]
         , [ 'C', 'equiv', { foo: 'bar' } ]
         , [ 'D', 'equiv', { value: 'replaced' } ]
+        , [ 'E', 'equiv', { hello: { value: 'replaced', toto: 42, C: { foo: 'bar' } } } ]
         ]
       ]
     }

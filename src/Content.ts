@@ -1,8 +1,8 @@
-import * as fs            from 'fs';
-import { join, dirname }  from 'path';
-import { Tree }           from './Tree';
-import { merge }          from './merge';
-import * as Obj           from './objects';
+import * as fs              from 'fs';
+import { join, dirname }    from 'path';
+import { Tree, WalkAction } from './Tree';
+import { merge }            from './merge';
+import * as Obj             from './objects';
 const yaml                = require('js-yaml');
 
 interface TaskInclude {
@@ -36,6 +36,11 @@ export async function get(data: any) {
     const newIncludes = process(data, basepath, directory);
     includes.push(...newIncludes);
   }
+  resolveReference(data);
+  return data;
+}
+
+export function resolveReference(data: any) {
   Tree.walk(data, (path, setter, holder) => {
     const key = path[path.length - 1];
     if (typeof key !== 'string') return ;
@@ -44,13 +49,13 @@ export async function get(data: any) {
     if (typeof setter !== 'function') return ;
     delete holder[key];
     setter(data, holder);
+    return WalkAction.Reloop;
   });
-  return data;
 }
 
 export function process(node: any, path: Array<string>, basedir: string) {
   const includes: Array<TaskInclude> = [];
-  Tree.walk(Obj.get(node, path), (path, overwrite, holder) => {
+  Tree.walk(Obj.get(node, path), function iterate(path, overwrite, holder) {
     if (typeof overwrite === 'function') return ;
     const key = path[path.length - 1];
     if (typeof key !== 'string') return ;
@@ -71,6 +76,7 @@ export function process(node: any, path: Array<string>, basedir: string) {
         const finalValue = merge(referencedValue, overwrite);
         Obj.set(holder, targetpath, finalValue);
       };
+      Tree.walk(overwrite, iterate);
     } break ;
     }
   }, path);
