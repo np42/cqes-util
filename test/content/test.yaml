@@ -6,3 +6,18 @@
 
   D:
     value: replaced
+
+foo:
+  key:
+    value: 42
+
+bar:
+  key:
+    another: 42
+
+both:
+  '&:foo:1': {}
+  '&:bar:1': {}
+  key:
+    and: 42
+

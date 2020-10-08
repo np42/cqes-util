@@ -74,7 +74,7 @@ export function process(node: any, path: Array<string>, basedir: string) {
       holder[key] = (root: any, holder: any) => {
         const referencedValue = Obj.get(node, sourcepath) || Obj.get(root, sourcepath);
         const finalValue = merge(referencedValue, overwrite);
-        Obj.set(holder, targetpath, finalValue);
+        Obj.set(holder, targetpath, merge(Obj.get(holder, targetpath), finalValue));
       };
       Tree.walk(overwrite, iterate);
     } break ;

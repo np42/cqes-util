@@ -13,6 +13,7 @@ Test.test(
         , [ 'C', 'equiv', { foo: 'bar' } ]
         , [ 'D', 'equiv', { value: 'replaced' } ]
         , [ 'E', 'equiv', { hello: { value: 'replaced', toto: 42, C: { foo: 'bar' } } } ]
+        , [ 'both', 'equiv', { key: { value: 42, another: 42, and: 42 } } ]
         ]
       ]
     }
