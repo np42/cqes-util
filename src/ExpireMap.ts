@@ -43,7 +43,7 @@ export class ExpireMap<K, V> {
     }
   }
 
-  public set(key: K, ttl: number, value: V) {
+  public set(key: K, ttl: number /* ms */, value: V) {
     if (!(ttl > 0 && isFinite(ttl))) throw new Error('TTL must be a positive finite number');
     const now = Date.now();
     if (this.map.has(key)) {
@@ -129,6 +129,7 @@ export class ExpireMap<K, V> {
       if (now < bucket.expires) break ;
       for (const key of bucket.keys) {
         const entry = this.map.get(key);
+        if (entry == null) continue ;
         this.map.delete(key);
         this.events.emit('expired', { key, value: entry.value });
       }
