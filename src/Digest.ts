@@ -45,3 +45,7 @@ export class Digest {
   }
 
 }
+
+export function digest(data: any) {
+  return new Digest().update(data).toString();
+}
