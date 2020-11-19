@@ -1,5 +1,7 @@
 import { serialize } from './objects';
 
+const SEAL = '--cqes-digest-seal--';
+
 export class Digest {
   protected buffer: Array<number>;
   protected m1:     number;
@@ -7,7 +9,7 @@ export class Digest {
   protected offset: number;
 
   constructor() {
-    this.buffer = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this.buffer = [ 101, 204, 31, 31, 79, 69, 154, 67, 116, 44, 6, 49, 242, 72, 186, 183 ];
     this.m1     = 42;
     this.m2     = 2843;
     this.offset = 0;
@@ -33,6 +35,7 @@ export class Digest {
   }
 
   public toString() {
+    this.update(SEAL);
     const output = [];
     for (var o = 0; o < 16; o++) {
       const hex = this.buffer[o].toString(16);
