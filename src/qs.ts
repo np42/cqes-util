@@ -8,8 +8,14 @@ export function qsencode(data: Object) {
     const escapedKey = encodeURIComponent(key);
     const path = key === null ? '' : accu + (accu.length === 0 ? escapedKey : '[' + escapedKey + ']');
     switch (Object.prototype.toString.call(data)) {
-    case '[object Number]': case '[object Boolean]': case '[object String]':
+    case '[object Number]': case '[object Boolean]':
+      result.push(path + '=' + data);
+      return accu;
+    case '[object String]':
       result.push(path + '=' + encodeURIComponent(data));
+      return accu;
+    case '[object Date]':
+      result.push(path + '=' + data.toISOString());
       return accu;
     case '[object Object]':
       for (const key in data) loop(key, data[key], path);
