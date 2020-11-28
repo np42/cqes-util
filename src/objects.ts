@@ -65,6 +65,12 @@ export function isObject(alpha: any) {
   return false;
 }
 
+export function isLambda(fn: any) {
+  if (typeof fn !== 'function') return false;
+  if (fn.prototype) return false;
+  return true;
+}
+
 export function kind(alpha: any) {
   const name = Object.prototype.toString.call(alpha);
   return name.substring(8, name.length - 1);
