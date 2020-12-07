@@ -38,6 +38,12 @@ export function set(target: any, path: string | Array<string>, value: any) {
   }
 }
 
+export function omap(object: Object, fn: (value: any, key: string) => any) {
+  return Object.fromEntries(Object.entries(object).map(([key, value]) => {
+    return [key, fn(value, key)];
+  }));
+}
+
 export function remove(target: any, path: string | Array<string>) {
   const chain = typeof path === 'string' ? path.split('.') : path;
   while (chain.length > 1 && target != null) target = target[chain.shift()];

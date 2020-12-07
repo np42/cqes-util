@@ -1,5 +1,6 @@
 let counter = 0;
 let lastTs  = 0;
+
 export function genId() {
   const ts = Date.now();
   if (lastTs == ts) counter = (counter + 1) % 0xffff;

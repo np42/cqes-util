@@ -46,6 +46,9 @@ export class Digest {
 
 }
 
-export function digest(data: any) {
-  return new Digest().update(data).toString();
+export function digest(...args: any[]) {
+  const digest = new Digest();
+  for (const data of args)
+    digest.update(data);
+  return digest.toString();
 }
