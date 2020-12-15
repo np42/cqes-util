@@ -69,11 +69,12 @@ export function process(node: any, path: Array<string>, basedir: string) {
       const [scheme, source, target] = key.split(':');
       const sourcepath = source.split('.');
       const targetpath = target == null ? sourcepath
-        : /^\d+$/.test(target) ? sourcepath.slice(Number(target))
+        : target === '*' ? []
+        : /^-?\d+$/.test(target) ? sourcepath.slice(Number(target))
         : target.split('.');
       holder[key] = (root: any, holder: any) => {
         const referencedValue = Obj.get(node, sourcepath) || Obj.get(root, sourcepath);
-        const finalValue = merge(referencedValue, overwrite);
+        const finalValue = overwrite === null ? referencedValue : merge(referencedValue, overwrite);
         Obj.set(holder, targetpath, merge(Obj.get(holder, targetpath), finalValue));
       };
       Tree.walk(overwrite, iterate);
