@@ -16,5 +16,8 @@
   "homepage": "https://github.com/apiculteur/cqes-util#readme",
   "dependencies": {
     "js-yaml": "^3.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.17"
   }
 }
