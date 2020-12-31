@@ -62,8 +62,15 @@ export function process(node: any, path: Array<string>, basedir: string) {
     const scheme = key.slice(0, 2);
     switch (scheme) {
     case '%:': {
-      const [scheme, file, extract, target] = key.split(':');
-      includes.push({ node, path, basedir, file, extract, overwrite, target });
+      const rest = key.slice(2);
+      if (/^[A-Z]+:\\/.test(rest)) {
+        const file = rest.slice(0, rest.indexOf(':', 3));
+        const [extract, target] = rest.slice(file.length + 1).split(':');
+        includes.push({ node, path, basedir, file, extract, overwrite, target });
+      } else {
+        const [file, extract, target] = rest.split(':');
+        includes.push({ node, path, basedir, file, extract, overwrite, target });
+      }
     } break ;
     case '&:': {
       const [scheme, source, target] = key.split(':');
