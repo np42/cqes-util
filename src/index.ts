@@ -2,6 +2,7 @@ export { merge }          from './merge';
 export { clone }          from './clone';
 export { memoize }        from './memoize';
 export { extract }        from './extract';
+export *                  from './String';
 export *                  from './qs';
 export { genId }          from './genId';
 export { Tree }           from './Tree';
