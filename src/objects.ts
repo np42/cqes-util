@@ -39,6 +39,7 @@ export function set(target: any, path: string | Array<string>, value: any) {
 }
 
 export function omap(object: Object, fn: (value: any, key: string) => any) {
+  if (!(object instanceof Object)) return [];
   return Object.fromEntries(Object.entries(object).map(([key, value]) => {
     return [key, fn(value, key)];
   }));
