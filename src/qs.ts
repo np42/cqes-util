@@ -44,6 +44,7 @@ export function qsdecode(str: string) {
     case 'true':  value = true;  break ;
     case 'false': value = false; break ;
     case 'null':  value = null;  break ;
+    case '':      value = '';    break ;
     default:
       if (isNumber.test(value)) value = parseFloat(value);
       break ;
