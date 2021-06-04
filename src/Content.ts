@@ -116,5 +116,5 @@ export async function readJSON(filepath: string) {
 
 export async function readYAML(filepath: string) {
   const buffer = await readText(filepath);
-  return yaml.safeLoad(buffer.toString());
+  return yaml.load(buffer.toString());
 }
